@@ -1,0 +1,4 @@
+resumes.db
+uploads/
+__pycache__/
+*.pyc

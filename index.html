@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Database</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: system-ui, sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
+        }
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+        }
+        .header p {
+            font-size: 14px;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .sidebar {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            height: fit-content;
+        }
+        .sidebar h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: #2563eb;
+        }
+        .filter-group {
+            margin-bottom: 14px;
+        }
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .filter-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-right: 8px;
+            margin-top: 8px;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e5e5e5;
+        }
+        .card-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .card-title {
+            font-size: 13px;
+            color: #555;
+            margin-top: 2px;
+        }
+        .card-meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+        .tag {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin: 4px 4px 0 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>📋 Resume Database</h1>
+        <p>Search and manage candidate profiles</p>
+    </div>
+
+    <div class="container">
+        <!-- Filters -->
+        <div class="sidebar">
+            <h3>Filters</h3>
+            <div class="filter-group">
+                <label>Location</label>
+                <input type="text" id="filterLocation" placeholder="e.g. Bangalore">
+            </div>
+            <div class="filter-group">
+                <label>Skills</label>
+                <input type="text" id="filterSkills" placeholder="e.g. Python, React">
+            </div>
+            <div class="filter-group">
+                <label>Min Experience (years)</label>
+                <input type="number" id="filterExpMin" placeholder="e.g. 2">
+            </div>
+            <div class="filter-group">
+                <label>Max Experience (years)</label>
+                <input type="number" id="filterExpMax" placeholder="e.g. 5">
+            </div>
+            <button onclick="fetchResumes()" style="background:#2563eb;color:white">🔍 Search</button>
+            <button onclick="clearFilters()" style="background:#f5f5f5">❌ Clear</button>
+        </div>
+
+        <!-- Resume Cards -->
+        <div class="main">
+            <div class="top-bar">
+                <h2>Candidates</h2>
+                <button onclick="openAddModal()" style="background:#2563eb;color:white">+ Add Resume</button>
+            </div>
+            <div id="cardList"></div>
+        </div>
+    </div>
+
+    <!-- Add Resume Modal -->
+    <div id="addModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:100; align-items:center; justify-content:center;">
+        <div style="background:white; padding:24px; border-radius:12px; width:500px; max-height:90vh; overflow-y:auto;">
+            <h2 style="margin-bottom:16px">Add New Resume</h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div>
+                    <label>Full Name *</label>
+                    <input id="fName" placeholder="John Doe" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
+                </div>
+                <div>
+                    <label>Job Title *</label>
+                    <input id="fTitle" placeholder="Software Engineer" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
+                </div>
+                <div>
+                    <label>Location *</label>
+                    <input id="fLocation" placeholder="Bangalore" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
+                </div>
+                <div>
+                    <label>Experience (years) *</label>
+                    <input id="fExp" type="number" placeholder="3" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
+                </div>
+                <div>
+                    <label>Email</label>
+                    <input id="fEmail" placeholder="john@email.com" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
+                </div>
+                <div>
+                    <label>Company</label>
+                    <input id="fCompany" placeholder="Acme Inc." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
+                </div>
+                <div>
+                    <label>Education</label>
+                    <select id="fEdu" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
+                        <option>Bachelor's</option>
+                        <option>Master's</option>
+                        <option>PhD</option>
+                        <option>Diploma</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Skills (comma separated)</label>
+                    <input id="fSkills" placeholder="Python, React, SQL" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
+                </div>
+            </div>
+            <div style="margin-top:12px">
+                <label>Summary</label>
+                <textarea id="fSummary" placeholder="Brief summary..." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;height:80px"></textarea>
+            </div>
+            <div style="margin-top:12px">
+                <label>Upload Resume PDF</label>
+                <input type="file" id="fFile" accept=".pdf" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
+            </div>
+            <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px">
+                <button onclick="closeAddModal()" style="background:#f5f5f5">Cancel</button>
+                <button onclick="saveResume()" style="background:#2563eb;color:white">Save Resume</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const API = "http://127.0.0.1:8000";
+
+    async function fetchResumes() {
+        const location = document.getElementById("filterLocation").value;
+        const skills = document.getElementById("filterSkills").value;
+        const expMin = document.getElementById("filterExpMin").value;
+        const expMax = document.getElementById("filterExpMax").value;
+
+        let url = `${API}/resumes?`;
+        if (location) url += `&location=${location}`;
+        if (skills) url += `&skills=${skills}`;
+        if (expMin) url += `&exp_min=${expMin}`;
+        if (expMax) url += `&exp_max=${expMax}`;
+
+        const response = await fetch(url);
+        const resumes = await response.json();
+        displayResumes(resumes);
+    }
+
+    function displayResumes(resumes) {
+        const list = document.getElementById("cardList");
+        if (resumes.length === 0) {
+            list.innerHTML = "<p style='color:#888;text-align:center;padding:40px'>No candidates found!</p>";
+            return;
+        }
+        list.innerHTML = resumes.map(r => `
+            <div class="card">
+                <div class="card-name">${r.name}</div>
+                <div class="card-title">${r.title} ${r.company ? "at " + r.company : ""}</div>
+                <div class="card-meta">
+                    <span>📍 ${r.location}</span>
+                    <span>💼 ${r.exp} years</span>
+                    <span>🎓 ${r.edu || "N/A"}</span>
+                </div>
+                <div style="margin-top:8px">
+                    ${JSON.parse(r.skills || "[]").map(s => `<span class="tag">${s}</span>`).join("")}
+                </div>
+                <div style="margin-top:10px;display:flex;gap:8px">
+                    <button onclick="downloadResume(${r.id})" style="background:#dcfce7;color:#166534">📄 View PDF</button>
+                    <button onclick="deleteResume(${r.id})" style="background:#fee2e2;color:#dc2626">🗑️ Delete</button>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    async function downloadResume(id) {
+        window.open(`${API}/download/${id}`, "_blank");
+    }
+
+    async function deleteResume(id) {
+        if (!confirm("Delete this resume?")) return;
+        await fetch(`${API}/resumes/${id}`, { method: "DELETE" });
+        fetchResumes();
+    }
+
+    function clearFilters() {
+        document.getElementById("filterLocation").value = "";
+        document.getElementById("filterSkills").value = "";
+        document.getElementById("filterExpMin").value = "";
+        document.getElementById("filterExpMax").value = "";
+        fetchResumes();
+    }
+
+    function openAddModal() {
+        document.getElementById("addModal").style.display = "flex";
+    }
+
+    function closeAddModal() {
+        document.getElementById("addModal").style.display = "none";
+    }
+
+    async function saveResume() {
+        const name = document.getElementById("fName").value;
+        const title = document.getElementById("fTitle").value;
+        const location = document.getElementById("fLocation").value;
+        const exp = parseInt(document.getElementById("fExp").value);
+
+        if (!name || !title || !location || isNaN(exp)) {
+            alert("Please fill in Name, Title, Location and Experience!");
+            return;
+        }
+
+        const resume = {
+            name,
+            title,
+            location,
+            exp,
+            email: document.getElementById("fEmail").value,
+            company: document.getElementById("fCompany").value,
+            edu: document.getElementById("fEdu").value,
+            skills: document.getElementById("fSkills").value.split(",").map(s => s.trim()).filter(Boolean),
+            summary: document.getElementById("fSummary").value,
+        };
+
+        const response = await fetch(`${API}/resumes`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(resume)
+        });
+        const savedResume = await response.json();
+
+        const fileInput = document.getElementById("fFile");
+        if (fileInput.files.length > 0) {
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            await fetch(`${API}/upload/${savedResume.id}`, {
+                method: "POST",
+                body: formData
+            });
+        }
+
+        closeAddModal();
+        fetchResumes();
+    }
+
+    fetchResumes();
+</script>
+
+</body>
+</html>
