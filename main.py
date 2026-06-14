@@ -4,6 +4,17 @@ from database import init_db, get_db
 from fastapi import FastAPI, UploadFile, File
 import os
 import shutil
+from auth import authenticate_user, create_token, verify_token
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    username = verify_token(token)
+    if not username:
+        raise HTTPException(status_code=401, detail="Invalid or expired token!")
+    return username
 
 app= FastAPI()
 
@@ -140,3 +151,14 @@ async def download_resume(resume_id: int):
             from fastapi.responses import FileResponse
             return FileResponse(f"{folder}/{filename}", filename=filename)
     return {"error": "No file found for this resume"}
+
+
+from fastapi.security import OAuth2PasswordRequestForm
+
+@app.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Wrong username or password!")
+    token = create_token(user["username"])
+    return {"access_token": token, "token_type": "bearer"}

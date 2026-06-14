@@ -114,11 +114,37 @@
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <h1>📋 Resume Database</h1>
-        <p>Search and manage candidate profiles</p>
+<!-- Login Page -->
+<div id="loginPage" style="display:flex; position:fixed; inset:0; background:#f5f5f5; z-index:999; align-items:center; justify-content:center;">
+    <div style="background:white; padding:40px; border-radius:12px; width:350px; box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+        <h1 style="text-align:center; color:#2563eb; margin-bottom:8px">📋 Resume DB</h1>
+        <p style="text-align:center; color:#888; margin-bottom:24px; font-size:14px">Login to continue</p>
+        
+        <div style="margin-bottom:14px">
+            <label style="font-size:13px; font-weight:500">Username</label>
+            <input id="loginUsername" placeholder="admin" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;margin-top:4px;font-size:14px">
+        </div>
+        <div style="margin-bottom:20px">
+            <label style="font-size:13px; font-weight:500">Password</label>
+            <input id="loginPassword" type="password" placeholder="••••••••" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;margin-top:4px;font-size:14px">
+        </div>
+        <button onclick="login()" style="width:100%;padding:12px;background:#2563eb;color:white;border:none;border-radius:6px;font-size:15px;cursor:pointer;font-weight:500">
+            Login 🔐
+        </button>
+        <p id="loginError" style="color:#dc2626;text-align:center;margin-top:12px;font-size:13px;display:none">
+            Wrong username or password!!
+        </p>
     </div>
+</div>
+<div class="header" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <h1>📋 Resume Database</h1>
+        <p style="font-size:14px; margin-top:4px; opacity:0.8">Search and manage candidate profiles</p>
+    </div>
+    <button onclick="logout()" style="background:white; color:#2563eb; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:500">
+        Logout 🔐
+    </button>
+</div>
 
     <div class="container">
         <!-- Filters -->
@@ -213,7 +239,49 @@
     </div>
 
 <script>
-    const API = "resume-db-production.up.railway.app";
+    // Login function
+    async function login() {
+        const username = document.getElementById("loginUsername").value;
+        const password = document.getElementById("loginPassword").value;
+
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("password", password);
+
+        try {
+            const response = await fetch(`${API}/login`, {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem("token", data.access_token);
+                document.getElementById("loginPage").style.display = "none";
+                fetchResumes();
+            } else {
+                document.getElementById("loginError").style.display = "block";
+            }
+        } catch(e) {
+            alert("Cannot connect to server!!");
+        }
+    }
+
+    // Check if already logged in
+    function checkLogin() {
+        const token = localStorage.getItem("token");
+        if (token) {
+            document.getElementById("loginPage").style.display = "none";
+            fetchResumes();
+        }
+    }
+
+    // Logout function
+    function logout() {
+        localStorage.removeItem("token");
+        document.getElementById("loginPage").style.display = "flex";
+    }
+    const API = "http://127.0.0.1:8000";
 
     async function fetchResumes() {
         const location = document.getElementById("filterLocation").value;
@@ -282,6 +350,15 @@
 
     function closeAddModal() {
         document.getElementById("addModal").style.display = "none";
+            document.getElementById("fName").value = "";
+    document.getElementById("fTitle").value = "";
+    document.getElementById("fLocation").value = "";
+    document.getElementById("fExp").value = "";
+    document.getElementById("fEmail").value = "";
+    document.getElementById("fCompany").value = "";
+    document.getElementById("fSkills").value = "";
+    document.getElementById("fSummary").value = "";
+    document.getElementById("fFile").value = "";
     }
 
     async function saveResume() {
