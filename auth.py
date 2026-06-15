@@ -10,10 +10,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Our users database (we can add more users here)
 USERS = {
-    "admin": {
+    "sollexentech": {
         "username": "sollexentech",
-        "password": pwd_context.hash("Twothousandbc2000"),
-        "name": "sollexentech"
+        "password": pwd_context.hash("Twothousandbc2000!"),
+        "name": "Sollexentech"
     }
 }
 
