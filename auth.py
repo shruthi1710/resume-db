@@ -12,13 +12,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 USERS = {
     "admin": {
         "username": "sollexentech",
-        "password": pwd_context.hash("twothousandbc"),
-        "name": "Admin User"
+        "password": pwd_context.hash("Twothousandbc2000"),
+        "name": "sollexentech"
     }
 }
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    return pwd_context.verify(plain_password, hashed_password
 
 def authenticate_user(username: str, password: str):
     user = USERS.get(username)
