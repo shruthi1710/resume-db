@@ -18,7 +18,7 @@ USERS = {
 }
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password
+    return pwd_context.verify(plain_password, hashed_password)
 
 def authenticate_user(username: str, password: str):
     user = USERS.get(username)
